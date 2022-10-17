@@ -6,9 +6,8 @@ Los datos fueron descargados desde el sitio web del observatorio social del Mini
 
 Para obtener la **base de datos completas** se debe seguir las siguientes instrucciones:
 
-1.- Ingresar al link:
-http://observatorio.ministeriodesarrollosocial.gob.cl/encuesta-casen-en-pandemia-2020
+1.- Ingresar al siguiente [LINK](http://observatorio.ministeriodesarrollosocial.gob.cl/encuesta-casen-en-pandemia-2020).
 
-2.- Dirigirse a la sección "Bases de datos"
+2.- Dirigirse a la sección "Bases de datos".
 
-3.- Click en "Descargar" al lado del documento que señala "Base de datos Casen en Pandemia 2020 STATA (revisado septiembre 2022)"
+3.- Click en "Descargar" al lado del documento que señala "Base de datos Casen en Pandemia 2020 STATA (revisado septiembre 2022)".
