@@ -6,7 +6,7 @@ Los datos fueron descargados desde el sitio web del observatorio social del Mini
 ## Base de datos a utilizar: 
 ### `Casen_filtrados.csv`
 
-####
+#### Dato completos:
 Para obtener la `base de datos completa` se debe seguir las siguientes instrucciones:
 
 1.- Ingresar al siguiente [LINK](http://observatorio.ministeriodesarrollosocial.gob.cl/encuesta-casen-en-pandemia-2020).
