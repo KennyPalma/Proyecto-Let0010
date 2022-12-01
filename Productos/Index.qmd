@@ -1,0 +1,429 @@
+---
+title: "Inseguridad alimentaria en Chile: Otra consecuencia del Covid-19"
+author: "Kenny Palma"
+format: html
+code-fold: true
+number-sections: true
+code-summary: "Ver código"
+toc: true
+date: " 27 Noviembre 2022"
+smooth-scroll: true
+theme: Materia
+editor: visual
+---
+
+```{r}
+#| label: load-packages
+#| include: false
+
+library(tidyverse)
+library(rio)
+library(ggplot2)
+library(haven)
+library(ggtext)
+library(gghighlight)
+library(dplyr)
+library(knitr)
+```
+
+# Introducción				
+
+Según la Organización de las Naciones Unidas para la Agricultura y la Alimentación (FAO), la Seguridad Alimentaria "nivel de individuo, hogar, nación y global, se consigue cuando todas las personas, en todo momento, tienen acceso físico y económico a suficiente alimento, seguro y nutritivo, para satisfacer sus necesidades alimenticias y sus preferencias, con el objeto de llevar una vida activa y sana".	
+
+En Chile, la seguridad alimetaria no había sido un tema relevante en la ópinión pública, hasta que llegaron los años 2019 con el "Estallido social" y, posteriormente, el 2020 con la aparición del virus Covid-19. Una consecuencia en común que tienen estos sucesos históricos corresponde a que las personas comenzaron a entir que cada vez era mas dificil la obtención de alimentos, ya que muchos negocios cerraron su atención al público y la importación se disminuyo considerablemente. "Con la crisis del coronavirus, la inseguridad alimentaria aumentó levemente, lo que hizo que el gobierno repartiera cajas de alimentos a un sector importante de la población el año 2020,..." (*Dr. Fernando Vio del Río, 2022*).
+
+Un aumento en la inseguridad alimentaria en la población podría desencadenar en un aumento progresivo de personas con problemas de malnutrición. Aa su vez, esto puede influir en un aumento de enfermedades relacionadas a la alimentación, como la diabetes, hipertención, sobre pero, obesidad, desnutrición, etc. Es por esto que ess importante evaluar constantemente el nivel y la proporción de inseguridad alimentaria en la población, para asi implemetar soluciones a tiempo.
+
+El objetivo de este informe es visualizar los resultados de algunas preguntas de la encuesta Caracterización Socioeconómica Nacional (CASEN) En Pandemia 2020 que hacen refencia a la seguridad alimentaria de los hogares encuestados. Esto nos permitirá conocer como estaba la situación el año 2020, para reflexionar sobre la afirmación del Dr. del Rio y para visualizar, específicamente, que estaría generando este supuesto aumento de la inseguridad alimentaria.
+
+Para lograr este objetivo se realizará un análisis exploratorio de los resultados de la encuesta cuyo fin principal es estimar la magnitud de la pobreza en Chile. Dado que esta encuesta es extensa, se utilizarán solo algunas secciones relevantes como la de salud e ingresos, entre otras. 
+
+Este informe se dividirá en cuatro secciones. En primer lugar, se mostrará un resumen de los datos de la encuesta CASEN, y las preguntas utilizadas para este trabajo. Luego, se revisarán los resultados obtenidos del análisis exploratorio. En tercer lugar, realizará una conclusión. Finalmente se podrán encontrar las referencias utilizadas en este trabajo.
+
+```{r}
+#| include: false
+# Datos
+setwd("/Users/kennypalma/Documents/Universidad/2022-2/LET/PROYECTO/Códigos")
+Datos.casen = read.csv("Casen2020_filtrados1.csv")
+attach(Datos.casen)
+
+```
+
+```{r}
+#| include: false
+# Eliminamos NA en la variable de interés
+datos = Datos.casen[!is.na(Datos.casen$Estado_nutricional_niñe),]
+
+# Renombramos los valores según la codificación
+datos$Estado_nutricional_niñe = as.factor(datos$Estado_nutricional_niñe)
+levels(datos$Estado_nutricional_niñe) = c("Desnutrido","Normal", "Sobrepeso", "Obeso","No sabe")
+
+
+```
+
+# DATOS
+
+La Encuesta de Caracterización Socioeconómica Nacional (CASEN) es una encuesta a hogares, de carácter transversal y multipropósito, realizada por el Ministerio de Desarrollo Social y Familia. Su primera implementación se llevó a cabo el año 1987 y hasta la actualidad se han realizado 15 versiones. La última versión se llevó a cabo el año 2020 y lleva el nombre Encuesta Casen en Pandemia 2020, ya que se realizó bajo el contexto de la crisis sanitaria del Covid-19. Tal como se indica en el Manual del Investigador Casen en Pandemia 2020, esta versión especial tiene 5 objetivos principales, dentro de los cuales se incluye "Identificar carencias de la población en las áreas de educación, salud, vivienda, trabajo e ingresos".  
+
+Durante el 31 de octubre 2020 y el 04 de febrero 2021 fueron encuestadas 185.437 personas distribuidas en 62.911 hogares. A cada uno de estos se le aplicó un cuestionario que está compuesto por 7 módulos temáticos que consisten en registro de residentes, educación, trabajo, ingresos, salud, identidades y vivienda.  
+
+En particular, para este estudio se seleccionaron algunas preguntas de solo tres módulos que se especifican en la tabla 1. 
+
+```{r}
+Variables = colnames(Datos.casen)
+datos.t = as.data.frame(cbind(Variables[-1], c("Identificador de persona en el hogar", "Edad","Sexo","Región", "¿Usted u otra persona en su hogar se preocupó por no tener suficientes alimentos para comer por falta de dinero u otros recursos?"," ¿Alguna vez usted u otra persona en su hogar no pudo comer alimentos saludables y nutritivos por falta de dinero u otros recursos?","Pensando en los últimos 12 meses, ¿alguna vez usted u otra persona en su hogar comió poca variedad de alimentos por falta de dinero u otros recursos?","¿Algunavezusteduotrapersonaensuhogartuvo que dejar de desayunar, almorzar, tomar once o cenar porque no había suficiente dinero u otros recursos para obtener alimentos?","¿Alguna vez usted u otra persona en su hogar comió menos de lo que pensaba que debía comer por falta de dinero u otros recursos?","Pensando en los últimos 12 meses, ¿alguna vez su hogar se quedó sin alimentos por falta de dinero u otros recursos?"," ¿Alguna vez usted u otra persona en su hogar sintió hambre y no comió por falta de dinero u otros recursos para obtener alimentos?","¿Alguna vez usted u otra persona en su hogar dejó de comer todo un día por falta de dinero u otros recursos?","¿Cuál es el estado nutricional de [NIÑO/A] Para facilitar su respuesta a esta pregunta, sería ideal si pudiera contar con el carnet de control de niño sano.")))
+colnames(datos.t) = c("Variables", "Descripción")
+datos.t[13,1] = c("s2")
+kable(datos.t, align = "ll", caption = "Tabla 1: Descripción de los datos a utilizar")
+```
+
+Los datos completos pueden encontrarse en la página web oficial del ministerio de desarrollo social.
+
+# RESULTADOS
+
+Para comenzar con el análisis es necesario observar cómo se distribuye el estado nutricional de las personas encuestadas. En esta ocasión, solo se recolectó información sobre niñsa y niños de 0 a 9 años. Si bien esto no nos da una visualización de toda la población, las niñas y niños son a quienes les afectará las desiciones sobre este tema en un futuro, por lo que pareciera ser importante la revisión de estos datos.
+
+```{r}
+
+
+datos$Sexo = as.factor(datos$Sexo)
+levels(datos$Sexo) = c("Hombre", "Mujer")
+EN.sexo = datos %>% ggplot(aes(x = Estado_nutricional_niñe)) +
+  labs(title = "Cantidad de niñas y niños según estado nutricional",
+       subtitle = "División por sexo",
+       x = "", y = "", caption = "Figura 1") + 
+  geom_bar(aes(fill = Sexo),position = "dodge") +
+  scale_fill_manual(values=c("black","purple4"))+
+  theme_bw()
+EN.sexo
+
+```
+
+En la *Figura 1* se observa que gran parte de niñas y niños participantes de la encuesta mantienen un estado nutricional normal (80% aproximadamente). Sin embargo, el problema radica en que un 19% de niñas y niños encuestados tienen un estado nutricional fuera de lo normal, siendo el sobre peso el estado predominante.
+
+Es importante destacar que un estado nutricional anormal está directamente relacionada con la inseguridad alimentaria, pero un estado normal tampoco queda excento, ya que pueden haber otros factores que ayuden a esa persona a mantenerlo incluso si está en una situación de baja seguridad alimentaria.
+
+Para combatir este problema es necesario conocer algunas de las causas de este, y así poder proponer y plantear soluciones que sean sostenibles a largo plazo.
+
+Tal como se menciona en secciones anteriores, la mal nutricion de niñas y niños podría ser consecuencia de la inseguridad alimentaria. La encuesta CASEN 2020 incluye 8 preguntas relacionadas a este concepto, por lo que es de interés visualizar las respuestas obtenidas.
+
+```{r}
+#| include: false
+## Estado Nutricional Normal
+table(Datos.casen$Estado_nutricional_niñe)[2]/length(na.omit(Datos.casen$Estado_nutricional_niñe))
+# 80%
+
+## Estado nutricional alterado 
+(table(Datos.casen$Estado_nutricional_niñe)[1]+table(Datos.casen$Estado_nutricional_niñe)[3]+table(Datos.casen$Estado_nutricional_niñe)[4])/length(na.omit(Datos.casen$Estado_nutricional_niñe))
+# 19%
+```
+
+## Pregunta r8a: ¿Usted u otra persona en su hogar se preocupó por no tener  suficientes alimentos para comer por falta de dinero u otros recursos?
+
+```{r}
+### TOTALES POR ÍNDICE
+
+#######################
+# Su hogar se preocupó por no tener suficientes alimentos para comer 
+# por falta de dinero 
+
+Datos.casen$r8a = as.factor(Datos.casen$r8a)
+levels(Datos.casen$r8a) = c("Si", "No")
+
+
+AS.a = Datos.casen %>% ggplot(aes(x = r8a)) +
+  labs(title = "r8a : ¿Usted u otra persona en su hogar se preocupó por no tener \n suficientes alimentos para comer por falta de dinero u otros recursos?",
+       x = "", y = "Frecuencia
+       ", caption = "Figura 2") + 
+  geom_bar(aes(fill = r8a),position = "dodge", width = 0.6) +
+  geom_text(stat='count', aes(x = r8a, 
+                              label = ..count..), vjust = 1.4,
+            color = "white", fontface = "bold",size=6) +
+  scale_fill_manual(values=c("#CDAD00","darkslategray4"))+
+  guides(fill = guide_legend(title = "Respuesta"))+
+  theme_bw()
+AS.a
+
+```
+
+```{r}
+#| include: false
+# % 
+table(Datos.casen$r8a)[1]/length(Datos.casen$r8a) # 37%
+
+```
+
+En la *Figura 2* se observa que, si bien, la mayoría de encuestados declaran tener suficientes alimentos para comer, aún existe casi un 40% de respuestas que señalan haber sentido preocupación por tener escasez de estos. Esta situación es alarmante ya que es una señal de inestabilidad en el hogar al momento de comprar alimentos.
+
+Otra perspectiva que se puede tener de este resultado es que hay un factor contextual que está afectándolo. Este correspondería a la crisis sanitaria que se estaba viviendo al momento de la encuesta, ya que muchos negocios cerraron y las importaciones de productos se hizo mas lenta. Esto podría haber aumentado la sensación de incertidumbre sobre la accesibilidad a alimentos.
+
+El resultado anterior nos da una idea sobre la percepción de las personas, pero también es posible saber, concretamente, cuantos encuestados no pudieron comer por falta de dinero u otros recursos.
+
+## Pregunta r8b: ¿Alguna vez usted u otra persona en su hogar no pudo comer alimentos saludables y nutritivos por falta de dinero u otros recursos?
+
+```{r}
+#######################
+# no pudo comer alimentos saludables y nutritivos por falta de dinero 
+# u otros recursos
+
+Datos.casen$r8b = as.factor(Datos.casen$r8b)
+levels(Datos.casen$r8b) = c("Si", "No")
+
+
+AS.b = Datos.casen %>% ggplot(aes(x = r8b)) +
+  labs(title = "r8b: ¿Alguna vez usted u otra persona en su hogar no pudo comer alimentos \n saludables y nutritivos por falta de dinero u otros recursos?",
+       x = "", y = "", caption = "Figura 3") + 
+  geom_bar(aes(fill = r8b),position = "dodge", width = 0.6) +
+  geom_text(stat='count', aes(x = r8b, 
+                              label = ..count..), vjust = 1.4,
+            color = "white", fontface = "bold",size=6) +
+  scale_fill_manual(values=c("#CDAD00","darkslategray4"))+
+  guides(fill = guide_legend(title = "Respuesta"))+
+  theme_bw()
+AS.b
+```
+
+```{r}
+#| include: false
+# % 
+table(Datos.casen$r8b)[1]/length(Datos.casen$r8b) # 26%
+```
+
+En la *FIGURA 3* se observa 48.297 encuestados (26% aprox.) declararon no haber podido comer alimento saludable y nutritivo por falta de dinero u otros recursos. Los resultados de esta pregunta son alarmantes ya que no solo evidencia un problema alimenticio, si no que también da cuenta de una crisis económica. Por lo tanto una propuesta para poder estabilizar y disminuir esta cifra podría ser la creación de medidas públicas que fomenten la estabilidad económica de las peronas.
+
+## Pregunta r8c: Pensando en los últimos 12 meses, ¿Alguna vez usted u otra persona en su hogar comió poca variedad de alimentos por falta de dinero u otros recursos?
+
+Otro factor que influye en la medición de la inseguridad alimentaria es la variedad de alimentos que consumen las personas.
+
+```{r}
+#######################
+# comió poca variedad de alimentos por falta de dinero u otros recursos
+
+Datos.casen$r8c = as.factor(Datos.casen$r8c)
+levels(Datos.casen$r8c) = c("Si", "No")
+
+
+AS.c = Datos.casen %>% ggplot(aes(x = r8c)) +
+  labs(title = " r8c: Pensando en los últimos 12 meses, Alguna vez usted \n u otra persona en su hogar comió poca variedad de alimentos por\n falta de dinero u otros recursos?",
+       x = "", y = "", caption = "Figura 4") + 
+  geom_bar(aes(fill = r8c),position = "dodge", width = 0.6) +
+  geom_text(stat='count', aes(x = r8c, 
+                              label = ..count..), vjust = 1.4,
+            color = "white", fontface = "bold",size=6) +
+  scale_fill_manual(values=c("#CDAD00","darkslategray4"))+
+  guides(fill = guide_legend(title = "Respuesta"))+
+  theme_bw()
+AS.c
+
+
+```
+
+```{r}
+#| include: false
+# % 
+table(Datos.casen$r8c)[1]/length(Datos.casen$r8c) # 29%
+```
+
+En la *FIGURA 4* se observa que 5.322 (30% aprox.) encuestados declaran haber comido poca variedad de alimentos durante el 2020.
+
+## Pregunta r8d: ¿Alguna vez usted u otra persona en su hogar tuvo que dejar de desayunar, almorzar, tomar once o cenar porque no había suficiente dinero u otros  recursos para obtener alimentos?
+
+Según el Ministerio de Sanidad de España, es recomendable realizar cinco comidas: desayuno, media mañana, comida, merienda y cena.
+
+```{r}
+#######################
+# tuvo que dejar de desayunar, almorzar, tomar once o cenar
+# porque no había suficiente dinero u otros recursos para obtener alimentos
+
+Datos.casen$r8d = as.factor(Datos.casen$r8d)
+levels(Datos.casen$r8d) = c("Si", "No")
+
+
+AS.d = Datos.casen %>% ggplot(aes(x = r8d)) +
+  labs(title = "r8d: ¿Alguna vez usted u otra persona en su hoga rtuvo que dejar de desayunar,\n almorzar, tomar once o cenar porque no había suficiente dinero u otros  \nrecursos para obtener alimentos?",
+       x = "", y = "", caption = "Figura 5") + 
+  geom_bar(aes(fill = r8d),position = "dodge", width = 0.6) +
+  geom_text(stat='count', aes(x = r8d, 
+                              label = ..count..), vjust = 1.4,
+            color = "white", fontface = "bold",size=6) +
+  scale_fill_manual(values=c("#CDAD00","darkslategray4"))+
+  guides(fill = guide_legend(title = "Respuesta"))+
+  theme_bw()
+AS.d
+```
+
+```{r}
+#| include: false
+# % 
+table(Datos.casen$r8d)[1]/length(Datos.casen$r8d) # 12%
+```
+
+En la *FIGURA 5* se observa que 21461 encuestados (12% aprox.) declararon haber tenido que saltarse al menos una comida diaria. Si bien, la proporción de respuestas afirmativas es menor que en las preguntas anteriores, es un problema que se tendría que abordar.
+
+## Pregunta r8e: ¿Alguna vez usted u otra persona en su hogar comió menos de lo que pensaba que debía comer por falta de dinero u otros recursos?
+
+Similar a la pregunta anterior, la r8e entrega la cantidad de personas que tuvieron que comer menos por falta de dinero u otros recursos, pero esta vez enfocada desde la cantidad óptima que la persona piensa que debería ingerir.
+
+```{r}
+#######################
+# Comió menos de lo que pensaba que debía comer
+
+Datos.casen$r8e = as.factor(Datos.casen$r8e)
+levels(Datos.casen$r8e) = c("Si", "No","Blanco")
+Datos.casen$r8e[is.na(Datos.casen$r8e)] = "Blanco"
+
+
+
+AS.e = Datos.casen %>% ggplot(aes(x =r8e)) +
+  labs(title = "r8e: ¿Alguna vez usted u otra persona en su hogar comió menso de\n lo que pensaba que debía comer por falta de dinero u otros recursos?",
+       x = "", y = "", caption = "Figura 6") + 
+  geom_bar(aes(fill = r8e),position = "dodge", width = 0.6) +
+  geom_text(stat='count', aes(x = r8e, 
+                              label = ..count..), vjust = 1.5,
+            color = "white", fontface = "bold",size=4) +
+  scale_fill_manual(values=c("#CDAD00","darkslategray4", "cornsilk3"))+
+  guides(fill = guide_legend(title = "Respuesta"))+
+  theme_bw()
+AS.e
+
+```
+
+```{r}
+#| include: false
+table(Datos.casen$r8e)[1]/length(Datos.casen$r8e) # 22%
+```
+
+En la FIGURA 6 se observa que la cantidad de respuestas si y no son muy similares, siendo la opción afirmativa la que predomina levemente (22% aprox.). Este resultado es un indicio claro de que realmente se vivió un estado de inseguridad alimentaria, ya que una alta proporción de la población pudo haber tenido dificultad en el acceso óptimo a alimentos.
+
+## Pregunta r8f: Pensando en los últimos 12 meses, ¿Alguna vez su hogar se quedó sin alimentos por falta de dinero u otros recursos
+
+Un nivel mayor de gravedad en inseguridad alimentaria se viviría si es que hay hogares que no solo disminuyen su capacidad de obtención de alimentos, si no que este es nulo.
+
+```{r}
+Datos.casen$r8f = as.factor(Datos.casen$r8f)
+levels(Datos.casen$r8f) = c("Si", "No","Blanco")
+Datos.casen$r8f[is.na(Datos.casen$r8f)] = "Blanco"
+
+
+
+AS.f = Datos.casen %>% ggplot(aes(x =r8f)) +
+  labs(title = "r8f: Pensando en los últimos 12 meses, ¿Alguna vez su hogar\n se quedó sin alimentos por falta de dinero u otros recursos?",
+       x = "", y = "", caption = "Figura 7") + 
+  geom_bar(aes(fill = r8f),position = "dodge", width = 0.6) +
+  geom_text(stat='count', aes(x = r8f, 
+                              label = ..count..), vjust = 1.5,
+            color = "white", fontface = "bold",size=4) +
+  scale_fill_manual(values=c("#CDAD00","darkslategray4", "cornsilk3"))+
+  guides(fill = guide_legend(title = "Respuesta"))+
+  theme_bw()
+AS.f
+```
+
+```{r}
+#| include: false
+table(Datos.casen$r8f)[1]/length(Datos.casen$r8f) # 11%
+```
+
+En la FIGURA 7 se observa que 20450 personas (11% aprox) se quedaron sin alimentos. Es interesante notar que uno de los resultados mas importantes de la encuesta CASEN 2020 es que la tasa de pobreza en Chile estimada es de un 10,8% aproximadamente, numero sospechozamente similar el resultado de esta pregunta.
+
+## Pregunta r8g: ¿Alguna vez usted u otra persona en su hogar sintió hambre y no comió por falta de dinero u otros recursos para obtener alimentos?
+
+Segun la Real Academia Española (RAE), el Hambre se define como la Escasez de alimentos básicos, que causa carestía y miseria generalizada. Ya se observó en las preguntas anteriores, que durante la pandemia, una cantidad considerable de encuestados declaran haber sufrido escasez de alimentos, por lo que sería razonable esperar que un porcentaje entre eun 10% y 20% declaren haber sentido hambre.
+
+```{r}
+#######################
+# Sintió hambre y no comió
+
+Datos.casen$r8g = as.factor(Datos.casen$r8g)
+levels(Datos.casen$r8g) = c("Si", "No","Blanco")
+Datos.casen$r8g[is.na(Datos.casen$r8g)] = "Blanco"
+
+
+
+AS.g = Datos.casen %>% ggplot(aes(x =r8g)) +
+  labs(title = "r8g: ¿Alguna vez usted u otra persona en su hogar sintió hambre y\n no comió por falta de dinero u otros recursos para obtener alimentos?",
+       x = "", y = "", caption = "Figura 8") + 
+  geom_bar(aes(fill = r8g),position = "dodge", width = 0.6) +
+  geom_text(stat='count', aes(x = r8g, 
+                              label = ..count..), vjust = 1.5,
+            color = "white", fontface = "bold",size=4) +
+  scale_fill_manual(values=c("#CDAD00","darkslategray4", "cornsilk3"))+
+  guides(fill = guide_legend(title = "Respuesta"))+
+  theme_bw()
+AS.g
+
+```
+
+```{r}
+#| include: false
+# % 
+table(Datos.casen$r8g)[1]/length(Datos.casen$r8g) # 10%
+```
+
+En la *FIGURA 8* se observa que 18694 personas (10% aprox.) declara haber tenido hambre y dejado de comer. Este dato no muestra la temporalidad de esta falta absoluta de alimentos, por lo que no me parece un dato muy informativo.
+
+## Pregunta r8h: ¿Alguna vez usted u otra persona en su hogar dejó de comer todo un día por falta de dinero u otros recursos?
+
+Esta pregunta es mas especifica que la anterior, ya que declara un intervalo de tiempo en el cual las personas dejan de alimentarse. En este caso corresponde a un día completo. Este sería el caso más extremo de todo el estudio y, por esta razón, es esperable que disminuya el porcentaje de respuestas afirmativas.
+
+```{r}
+Datos.casen$r8h = as.factor(Datos.casen$r8h)
+levels(Datos.casen$r8h) = c("Si", "No","Blanco")
+Datos.casen$r8h[is.na(Datos.casen$r8h)] = "Blanco"
+
+
+
+AS.h = Datos.casen %>% ggplot(aes(x =r8h)) +
+  labs(title = "r8h: ¿Alguna vez usted u otra persona en su hogar dejó de comer todo un \n día por falta de dinero u otros recursos?",
+       x = "", y = "", caption = "Figura 9") + 
+  geom_bar(aes(fill = r8h),position = "dodge", width = 0.6) +
+  geom_text(stat='count', aes(x = r8h, 
+                              label = ..count..), vjust = 1.5,
+            color = "white", fontface = "bold",size=4) +
+  scale_fill_manual(values=c("#CDAD00","darkslategray4", "cornsilk3"))+
+  guides(fill = guide_legend(title = "Respuesta"))+
+  theme_bw()
+AS.h
+
+```
+
+```{r}
+#| include: false
+# % 
+table(Datos.casen$r8h)[1]/length(Datos.casen$r8h) # 4%
+```
+
+Tal como se esperaba, en la *FIGURA 9* se muestra que solo 8079 (4% aprox.) encuestados declaran haber dejado de comer por un día completo. Esto podría ser una señal de que el nivel de inseguridad alimentaria no es extremo.
+
+# CONCLUSIÓN									
+
+La seguridad alimentaria es un problema que no solo afecta a individuos, si no que involucra sociedades y como estas se organizan. Es por esto que es importante evaluar constantemente el estado del bienestar de las comunidades, ya sean comunas, regiones, ciudades o países y las personas que las componen.
+
+Durante este estudio se analizaron las respuestas a lpreguntas que tienen relación al concepto seguridad (e inseguridad) alimentaria. Es evidente que, al menos dentro de las y los encuestados, a partir del año 2020 (e incluso 2019) exite un problema de alimentación. En este sentido sería importantecontinuar este estudio realizando una estimación de todos estos índices a nivel poblacional, es decir estimar el porcentaje real de personas residentes en chile que respondería de manera afirmativa a todas las preguntas mencionadas anteriormente. Así se tendría mayor certeza de la situación y se podrían implementar medidas para poder solcionar el problema.
+
+A modo de reflexión, creo que la alimentación saludable, variada y estable es escencial para que un ser humano pueda vivir, al fin y al cabo comer es una necesidad básica y debiera ser una de las máximas preocupaciones de un estado. Si bien, creo que no existe una medida perfecta para "acabar con el hambre para siempre", es importante estar constantemente evaluando los índices, el contexto y todos los factores que influyen en que el problema se incremente (o no disminuya). En ese sentido creo que este trabajo es un primer paso para un largo camino de estudios y políticas públicas que ayuden a mejorar las condiciones alimenticias de las personas.
+
+\"El hambre perpetúa la pobreza al impedir
+que las personas desarrollen sus
+potencialidades y contribuyan al progreso
+de sus sociedades\"
+(Kofi Annan, ONU, 2002)
+
+# REFERENCIAS
+
+-   ***FAO. 2011.** Seguridad Alimentaria y Nutricional Conceptos Básicos. [LINK](https://www.fao.org/3/at772s/at772s.pdf)*
+
+-   *Real Academia Española. (s.f.). Hambre. En Diccionario de la lengua española. [Hambre](https://dle.rae.es/hambre?m=form)*
+
+-   *Ministerio de Desarrollo Social y Familia en base a datos Encuesta Casen 2020*
+
+-   *Estilos de vida saludable - Distribución diaria*. (s. f.). [LINK](https://estilosdevidasaludable.sanidad.gob.es/alimentacionSaludable/queSabemos/enLaPractica/distribuir/diario/home.htm)
+
+-   del Rio, F. (2022). Inseguridad Alimentaria en Chile y en el Mundo. Instituto de Nutrición y tecnología de los alimentos. [LINK](https://inta.cl/inseguridad-alimentaria-en-chile-y-en-el-mundo/)
+
+    					
+    				
+    			
+    		
+
+    	
