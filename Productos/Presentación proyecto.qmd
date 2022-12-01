@@ -1,0 +1,219 @@
+---
+title: "Inseguridad alimentaria en Chile"
+subtitle: "¿Deberíamos preocuparnos?"
+author: "Kenny Palma"
+format:
+  revealjs: 
+    theme: simple
+    footer: "Pontificia Universidad Católica de Chile, Noviembre 2022"
+    logo: logouc.png
+editor: visual
+transition: slide
+---
+
+```{r}
+#| label: load-packages
+#| include: false
+
+library(tidyverse)
+library(rio)
+library(ggplot2)
+library(haven)
+library(ggtext)
+library(gghighlight)
+library(dplyr)
+library(knitr)
+```
+
+# MOTIVACIÓN
+
+## 
+
+```{=html}
+<div style="text-align: center">
+  <br>
+```
+> ***\"El hambre perpetúa la pobreza al impedir
+> que las personas desarrollen sus
+> potencialidades y contribuyan al progreso
+> de sus sociedades\"*** **(Kofi Annan, ONU, 2002)**
+
+```{=html}
+<div/>
+```
+```{r}
+#| include: false
+# Datos
+setwd("/Users/kennypalma/Documents/Universidad/2022-2/LET/PROYECTO/Presentacion")
+Datos.casen = read.csv("Casen2020_filtrados1.csv")
+attach(Datos.casen)
+
+```
+
+```{r}
+#| include: false
+# Eliminamos NA en la variable de interés
+datos = Datos.casen[!is.na(Datos.casen$Estado_nutricional_niñe),]
+
+# Renombramos los valores según la codificación
+datos$Estado_nutricional_niñe = as.factor(datos$Estado_nutricional_niñe)
+levels(datos$Estado_nutricional_niñe) = c("Desnutrido","Normal", "Sobrepeso", "Obeso","No sabe")
+
+
+```
+
+# SEGURIDAD ALIMENTARIA
+
+"Nivel de individuo, hogar, nación y global, se consigue cuando todas las personas, en todo momento, tienen acceso físico y económico a suficiente alimento, seguro y nutritivo, para satisfacer sus necesidades alimenticias y sus preferencias, con el objeto de llevar una vida activa y sana". (FAO, 2011)	
+
+# OBJETIVO
+
+Visualizar los resultados de algunas preguntas de la Encuesta Caracterización Socioeconómica Nacional (CASEN) En Pandemia 2020 que hacen refencia a la seguridad alimentaria de los hogares encuestados y así conocer el estado de estos.
+
+# ANTECEDENTES
+
+-   Crisis social 2019
+
+-   Pandemia virus Covid-19
+
+# DATOS 
+
+-   Encuesta Caracterización Socioeconómica Nacional (CASEN) En Pandemia 2020
+
+-   Identificar carencias de la población en las áreas de educación, salud, vivienda, trabajo e ingresos
+
+-   n = 18437
+
+-   Se utilizaron las respuestas obtenidas de 8 preguntas que hacen referencia a la inseguridad alimentaria, además de otras variables como Edad, sexo, región.
+
+## Tipo de preguntas
+
+-   ¿**Usted u otra persona en su hogar** se preocupó por no tener suficientes alimentos para comer **por falta de dinero u otros recursos?**
+
+# Resultados
+
+## Estado nutricional de niñas y niños 
+
+(0 a 9 años)
+
+```{r}
+
+datos$Sexo = as.factor(datos$Sexo)
+levels(datos$Sexo) = c("Hombre", "Mujer")
+EN.sexo = datos %>% ggplot(aes(x = Estado_nutricional_niñe)) +
+  labs(title = "Cantidad de niñas y niños según estado nutricional",
+       subtitle = "División por sexo",
+       x = "", y = "", caption = "Figura 1") + 
+  geom_bar(aes(fill = Sexo),position = "dodge") +
+  scale_fill_manual(values=c("black","purple4"))+
+  theme_bw()
+EN.sexo
+
+```
+
+## 
+
+**Por falta de dinero u otros recursos ...**
+
+```{=tex}
+\vspace{10mm}
+```
+```{=html}
+<p>
+<b style = 'color:red;'>37%</b> Se preocupó por no tener sucifientes alimentos para comer
+</p>
+<br>
+<p>
+<b style = 'color:red;'>29%</b> comió poca variedad de alimentos.
+</p>
+<br>
+<p>
+<b style = 'color:red;'>26%</b> no pudo comer alimentos  saludables y nutritivos
+</p>
+```
+##  
+
+```{=html}
+<p>
+<b style = 'color:red;'>22%</b> comió menos de lo que pensaba que debía comer
+</p>
+<br>
+```
+```{r}
+#######################
+# Comió menos de lo que pensaba que debía comer
+
+Datos.casen$r8e = as.factor(Datos.casen$r8e)
+levels(Datos.casen$r8e) = c("Si", "No","Blanco")
+Datos.casen$r8e[is.na(Datos.casen$r8e)] = "Blanco"
+
+
+
+AS.e = Datos.casen %>% ggplot(aes(x =r8e)) +
+  labs(title = "r8e: ¿Alguna vez usted u otra persona en su hogar comió menos de\n lo que pensaba que debía comer por falta de dinero u otros recursos?",
+       x = "", y = "", caption = "Figura 6") + 
+  geom_bar(aes(fill = r8e),position = "dodge", width = 0.6) +
+  geom_text(stat='count', aes(x = r8e, 
+                              label = ..count..), vjust = 1.5,
+            color = "white", fontface = "bold",size=4) +
+  scale_fill_manual(values=c("#CDAD00","darkslategray4", "cornsilk3"))+
+  guides(fill = guide_legend(title = "Respuesta"))+
+  theme_bw()
+AS.e
+```
+
+## 
+
+**Por falta de dinero u otros recursos ...**
+
+```{=html}
+<p>
+<b style = 'color:blue;'>12%</b> tuvo que dejar de desayunar, almorzar, tomar once o cenar
+</p>
+<br>
+<p>
+<b style = 'color:blue;'>11%</b>  su hogar se quedó sin alimento
+</p>
+<br>
+<p>
+<b style = 'color:blue;'>10%</b> sintió hambre y\n no comio
+</p>
+<br>
+<p>
+<b style = 'color:green;'>10,8%</b> Tasa de pobreza (Ministerio de Desarrollo Social y Familia en base a datos Encuesta Casen 2020)
+</p>
+```
+## 
+
+**Por falta de dinero u otros recursos ...**
+
+```{=html}
+<br>
+<p>
+<b style = 'color:red;'>4%</b> dejó de comer todo un día
+</p>
+```
+
+# Conclusión
+
+-   Hipótesis: Durante el año 2020, en Chile se vivió un estado de inseguridad alimentaria moderada
+
+-   Es urgente la implementación de medidas que ayuden a disminuir los índices
+
+# Proyecciones
+
+-   Estimación a nivel poblacional
+
+-   Comparación con la próxima versión de la encuesta
+
+-   Detectar grupos de riesgo
+
+# Referencias
+
+-   ***FAO. 2011.** Seguridad Alimentaria y Nutricional Conceptos Básicos. [LINK](https://www.fao.org/3/at772s/at772s.pdf)*
+
+-   *Ministerio de Desarrollo Social y Familia en base a datos Encuesta Casen 2020*
+
+-   *Estilos de vida saludable - Distribución diaria*. (s. f.). [LINK](https://estilosdevidasaludable.sanidad.gob.es/alimentacionSaludable/queSabemos/enLaPractica/distribuir/diario/home.htm)
+
+-   del Rio, F. (2022). Inseguridad Alimentaria en Chile y en el Mundo. Instituto de Nutrición y tecnología de los alimentos. [LINK](https://inta.cl/inseguridad-alimentaria-en-chile-y-en-el-mundo/)
